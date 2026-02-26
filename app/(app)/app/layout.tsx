@@ -21,6 +21,7 @@ export default async function Layout({
   return (
     <>
       <BackgroundPattern />
+
       <div className="flex flex-col max-w-262.5 mx-auto px-4 min-h-screen">
         <AppHeader />
         <SearchContextProvider>

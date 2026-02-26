@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import { usePetContext } from "@/lib/hooks";
+import PetButton from "./pet-button";
 
 export default function PetDetails() {
-  const { selectedPet } = usePetContext();
+  const { selectedPet, handleCheckoutPet } = usePetContext();
 
   return (
     <section className="flex flex-col h-full w-full">
@@ -24,6 +25,16 @@ export default function PetDetails() {
             <h2 className="text-3xl font-semibold leading-7 ml-5">
               {selectedPet?.name}
             </h2>
+
+            <div className="ml-auto space-x-2">
+              <PetButton actionType="edit">Edit</PetButton>
+              <PetButton
+                actionType="checkout"
+                onClick={() => handleCheckoutPet(selectedPet?.id)}
+              >
+                Checkout
+              </PetButton>
+            </div>
           </div>
           <div className="flex justify-around py-10 px-5 text-center">
             <div>
