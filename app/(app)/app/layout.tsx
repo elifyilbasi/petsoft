@@ -1,3 +1,4 @@
+import { Toaster } from "@/components/ui/sonner";
 import AppFooter from "@/components/app-footer";
 import AppHeader from "@/components/app-header";
 import BackgroundPattern from "@/components/background-pattern";
@@ -23,6 +24,7 @@ export default async function Layout({
         </SearchContextProvider>
         <AppFooter />
       </div>
+      <Toaster position="top-right" />
     </>
   );
 }

@@ -3,9 +3,10 @@
 import Image from "next/image";
 import { usePetContext } from "@/lib/hooks";
 import PetButton from "./pet-button";
+import { checkoutPet } from "@/actions/actions";
 
 export default function PetDetails() {
-  const { selectedPet, handleCheckoutPet } = usePetContext();
+  const { selectedPet } = usePetContext();
 
   return (
     <section className="flex flex-col h-full w-full">
@@ -30,7 +31,7 @@ export default function PetDetails() {
               <PetButton actionType="edit">Edit</PetButton>
               <PetButton
                 actionType="checkout"
-                onClick={() => handleCheckoutPet(selectedPet?.id)}
+                onClick={async () => await checkoutPet(selectedPet?.id)}
               >
                 Checkout
               </PetButton>

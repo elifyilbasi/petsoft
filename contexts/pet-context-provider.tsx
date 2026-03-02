@@ -33,25 +33,9 @@ export default function PetContextProvider({
     setSelectedPetId(id);
   };
 
-  // const handleCheckoutPet = (id: string) => {
-  //   setPets((prev) => prev.filter((pet) => pet.id !== id));
-  //   setSelectedPetId(null);
-  // };
-
   const handleAddPet = async (newPet: Omit<Pet, "id">) => {
     await addPet(newPet);
   };
-
-  // const handleEditPet = (petId: string, newPetData: Omit<Pet, "id">) => {
-  //   setPets((prev) =>
-  //     prev.map((pet) => {
-  //       if (pet.id === petId) {
-  //         return { id: petId, ...newPetData };
-  //       }
-  //       return pet;
-  //     }),
-  //   );
-  // };
 
   return (
     <PetContext
