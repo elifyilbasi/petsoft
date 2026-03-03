@@ -2,8 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import prisma from "@/lib/db";
+import { Pet } from "@prisma/client";
+import { PetEssentials } from "@/lib/types";
 
-export async function addPet(pet) {
+export async function addPet(pet: PetEssentials) {
   try {
     await prisma.pet.create({
       data: pet,
@@ -17,7 +19,7 @@ export async function addPet(pet) {
   revalidatePath("/app", "layout");
 }
 
-export async function editPet(petId, newPetData) {
+export async function editPet(petId: Pet["id"], newPetData: PetEssentials) {
   try {
     await prisma.pet.update({
       where: {
@@ -34,7 +36,7 @@ export async function editPet(petId, newPetData) {
   revalidatePath("/app", "layout");
 }
 
-export async function checkoutPet(petId) {
+export async function checkoutPet(petId: Pet["id"]) {
   try {
     await prisma.pet.delete({
       where: {

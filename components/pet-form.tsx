@@ -7,7 +7,7 @@ import { usePetContext } from "@/lib/hooks";
 import PetFormBtn from "./pet-form.btn";
 
 type PetFormProps = {
-  actionType: string;
+  actionType: "add" | "edit";
   onFormSubmit: () => void;
 };
 

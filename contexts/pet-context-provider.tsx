@@ -2,7 +2,8 @@
 
 import { useState, createContext, useOptimistic, startTransition } from "react";
 import { toast } from "sonner";
-import { Pet } from "@/lib/types";
+import { PetEssentials } from "@/lib/types";
+import { Pet } from "@prisma/client";
 import { addPet, checkoutPet, editPet } from "@/actions/actions";
 
 type PetContextProviderProps = {
@@ -12,13 +13,13 @@ type PetContextProviderProps = {
 
 type TPetContext = {
   pets: Pet[];
-  selectedPetId: string | null;
+  selectedPetId: Pet["id"] | null;
   selectedPet: Pet | undefined;
   numberOfPets: number;
-  handleChangeSelectedPetId: (id: string) => void;
-  handleAddPet: (newPet: Omit<Pet, "id">) => Promise<void>;
-  handleEditPet: (petId: string, newPet: Omit<Pet, "id">) => Promise<void>;
-  handleCheckoutPet: (id: string) => void;
+  handleChangeSelectedPetId: (id: Pet["id"]) => void;
+  handleAddPet: (newPet: PetEssentials) => Promise<void>;
+  handleEditPet: (petId: Pet["id"], newPet: PetEssentials) => Promise<void>;
+  handleCheckoutPet: (id: Pet["id"]) => void;
 };
 
 export const PetContext = createContext<TPetContext | null>(null);
@@ -53,7 +54,7 @@ export default function PetContextProvider({
     setSelectedPetId(id);
   };
 
-  const handleAddPet = async (newPet: Omit<Pet, "id">) => {
+  const handleAddPet = async (newPet: PetEssentials) => {
     startTransition(() => {
       setOptimisticPets({ action: "add", payload: newPet });
     });
@@ -64,7 +65,7 @@ export default function PetContextProvider({
     }
   };
 
-  const handleEditPet = async (petId: string, newPetData: Omit<Pet, "id">) => {
+  const handleEditPet = async (petId: Pet["id"], newPetData: PetEssentials) => {
     startTransition(() => {
       setOptimisticPets({ action: "edit", payload: { id: petId, newPetData } });
     });
@@ -75,7 +76,7 @@ export default function PetContextProvider({
     }
   };
 
-  const handleCheckoutPet = async (petId: string) => {
+  const handleCheckoutPet = async (petId: Pet["id"]) => {
     startTransition(() => {
       setOptimisticPets({ action: "delete", payload: petId });
     });
