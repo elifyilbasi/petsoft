@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { flushSync } from "react-dom";
 import { PlusIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -15,6 +16,7 @@ import PetForm from "./pet-form";
 
 type PetButtonProps = {
   actionType: "add" | "edit" | "checkout";
+  disabled?: boolean;
   children?: React.ReactNode;
   onClick?: () => void;
 };
@@ -22,12 +24,13 @@ type PetButtonProps = {
 export default function PetButton({
   actionType,
   onClick,
+  disabled,
   children,
 }: PetButtonProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   if (actionType === "checkout") {
     return (
-      <Button variant="secondary" onClick={onClick}>
+      <Button variant="secondary" onClick={onClick} disabled={disabled}>
         {children}
       </Button>
     );
@@ -53,7 +56,9 @@ export default function PetButton({
 
         <PetForm
           actionType={actionType}
-          onFormSubmit={() => setIsFormOpen(false)}
+          onFormSubmit={() => {
+            flushSync(() => setIsFormOpen(false));
+          }}
         />
         <DialogFooter></DialogFooter>
       </DialogContent>

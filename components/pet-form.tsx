@@ -4,9 +4,7 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { usePetContext } from "@/lib/hooks";
-import { addPet, editPet } from "@/actions/actions";
 import PetFormBtn from "./pet-form.btn";
-import { toast } from "sonner";
 
 type PetFormProps = {
   actionType: string;
@@ -14,26 +12,27 @@ type PetFormProps = {
 };
 
 export default function PetForm({ actionType, onFormSubmit }: PetFormProps) {
-  const { selectedPet } = usePetContext();
+  const { selectedPet, handleAddPet, handleEditPet } = usePetContext();
 
   return (
     <form
       action={async (formData) => {
-        if (actionType === "add") {
-          const error = await addPet(formData);
-          if (error) {
-            toast.warning(error.message);
-            return;
-          }
-        } else if (actionType === "edit") {
-          const error = await editPet(selectedPet?.id, formData);
-          if (error) {
-            toast.warning(error.message);
-            return;
-          }
-        }
-
         onFormSubmit();
+
+        const petData = {
+          name: formData.get("name") as string,
+          ownerName: formData.get("ownerName") as string,
+          imageUrl:
+            (formData.get("imageUrl") as string) ||
+            "https://bytegrad.com/course-assets/react-nextjs/pet-placeholder.png",
+          age: Number(formData.get("age")),
+          notes: formData.get("notes") as string,
+        };
+        if (actionType === "add") {
+          await handleAddPet(petData);
+        } else if (actionType === "edit") {
+          await handleEditPet(selectedPet!.id, petData);
+        }
       }}
       className="flex flex-col"
     >
@@ -45,7 +44,7 @@ export default function PetForm({ actionType, onFormSubmit }: PetFormProps) {
             name="name"
             type="text"
             required
-            defaultValue={actionType === "edit" ? selectedPet?.name : ""}
+            defaultValue={actionType === "edit" ? selectedPet!.name : ""}
           />
         </div>
 
@@ -56,7 +55,7 @@ export default function PetForm({ actionType, onFormSubmit }: PetFormProps) {
             name="ownerName"
             type="text"
             required
-            defaultValue={actionType === "edit" ? selectedPet?.ownerName : ""}
+            defaultValue={actionType === "edit" ? selectedPet!.ownerName : ""}
           />
         </div>
 
@@ -66,7 +65,7 @@ export default function PetForm({ actionType, onFormSubmit }: PetFormProps) {
             id="imageUrl"
             name="imageUrl"
             type="text"
-            defaultValue={actionType === "edit" ? selectedPet?.imageUrl : ""}
+            defaultValue={actionType === "edit" ? selectedPet!.imageUrl : ""}
           />
         </div>
 
@@ -77,7 +76,7 @@ export default function PetForm({ actionType, onFormSubmit }: PetFormProps) {
             name="age"
             type="number"
             required
-            defaultValue={actionType === "edit" ? selectedPet?.age : ""}
+            defaultValue={actionType === "edit" ? selectedPet!.age : ""}
           />
         </div>
 
@@ -88,7 +87,7 @@ export default function PetForm({ actionType, onFormSubmit }: PetFormProps) {
             name="notes"
             rows={3}
             required
-            defaultValue={actionType === "edit" ? selectedPet?.notes : ""}
+            defaultValue={actionType === "edit" ? selectedPet!.notes : ""}
           />
         </div>
       </div>
