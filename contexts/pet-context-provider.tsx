@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, createContext, useOptimistic } from "react";
+import { useState, createContext, useOptimistic, startTransition } from "react";
 import { toast } from "sonner";
 import { Pet } from "@/lib/types";
 import { addPet, checkoutPet, editPet } from "@/actions/actions";
@@ -29,14 +29,19 @@ export default function PetContextProvider({
 }: PetContextProviderProps) {
   const [optimisticPets, setOptimisticPets] = useOptimistic(
     data,
-    (state, newPet) => {
-      return [
-        ...state,
-        {
-          ...newPet,
-          id: Math.random().toString(),
-        },
-      ];
+    (state, { action, payload }) => {
+      switch (action) {
+        case "add":
+          return [...state, { id: Math.random().toString(), ...payload }];
+        case "edit":
+          return state.map((pet) =>
+            pet.id === payload.id ? { ...pet, ...payload.newPetData } : pet,
+          );
+        case "delete":
+          return state.filter((pet) => pet.id !== payload);
+        default:
+          return state;
+      }
     },
   );
   const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
@@ -49,7 +54,9 @@ export default function PetContextProvider({
   };
 
   const handleAddPet = async (newPet: Omit<Pet, "id">) => {
-    setOptimisticPets(newPet);
+    startTransition(() => {
+      setOptimisticPets({ action: "add", payload: newPet });
+    });
     const error = await addPet(newPet);
     if (error) {
       toast.warning(error.message);
@@ -58,6 +65,9 @@ export default function PetContextProvider({
   };
 
   const handleEditPet = async (petId: string, newPetData: Omit<Pet, "id">) => {
+    startTransition(() => {
+      setOptimisticPets({ action: "edit", payload: { id: petId, newPetData } });
+    });
     const error = await editPet(petId, newPetData);
     if (error) {
       toast.warning(error.message);
@@ -66,7 +76,14 @@ export default function PetContextProvider({
   };
 
   const handleCheckoutPet = async (petId: string) => {
-    await checkoutPet(petId);
+    startTransition(() => {
+      setOptimisticPets({ action: "delete", payload: petId });
+    });
+    const error = await checkoutPet(petId);
+    if (error) {
+      toast.warning(error.message);
+      return;
+    }
     setSelectedPetId(null);
   };
 
