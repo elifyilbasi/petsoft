@@ -9,6 +9,7 @@ import { usePetContext } from "@/lib/hooks";
 import PetFormBtn from "./pet-form.btn";
 import { DEFAULT_PET_IMAGE_URL } from "@/lib/constants";
 import { petFormSchema, TPetForm } from "@/lib/validations";
+import { da } from "zod/locales";
 
 type PetFormProps = {
   actionType: "add" | "edit";
@@ -20,8 +21,7 @@ export default function PetForm({ actionType, onFormSubmit }: PetFormProps) {
 
   const {
     register,
-    trigger,
-    getValues,
+    handleSubmit,
     formState: { errors },
   } = useForm<TPetForm>({
     defaultValues:
@@ -37,25 +37,22 @@ export default function PetForm({ actionType, onFormSubmit }: PetFormProps) {
     resolver: zodResolver(petFormSchema),
   });
 
+  const processForm = async (data: TPetForm) => {
+    const petData = {
+      ...data,
+      imageUrl: data.imageUrl || DEFAULT_PET_IMAGE_URL,
+    };
+
+    onFormSubmit();
+
+    if (actionType === "add") {
+      await handleAddPet(petData);
+    } else {
+      await handleEditPet(selectedPet!.id, petData);
+    }
+  };
   return (
-    <form
-      action={async () => {
-        const result = await trigger(); // runs validation and returns boolean
-        if (!result) return;
-
-        onFormSubmit();
-
-        const petData = getValues();
-        petData.imageUrl = petData.imageUrl || DEFAULT_PET_IMAGE_URL;
-
-        if (actionType === "add") {
-          await handleAddPet(petData);
-        } else if (actionType === "edit") {
-          await handleEditPet(selectedPet!.id, petData);
-        }
-      }}
-      className="flex flex-col"
-    >
+    <form onSubmit={handleSubmit(processForm)} className="flex flex-col">
       <div className="space-y-3">
         <div className="space-y-1">
           <Label htmlFor="name">Name</Label>
