@@ -1,5 +1,6 @@
 "use server";
 
+import bcrypt from "bcrypt";
 import { revalidatePath } from "next/cache";
 import { AuthError } from "next-auth";
 import prisma from "@/lib/db";
@@ -8,11 +9,7 @@ import { signIn, signOut } from "@/lib/auth";
 
 export async function logIn(authData: FormData) {
   try {
-    await signIn("credentials", {
-      email: authData.get("email") as string,
-      password: authData.get("password") as string,
-      redirectTo: "/app/dashboard",
-    });
+    await signIn("credentials", authData, { redirectTo: "/app/dashboard" });
   } catch (error) {
     if (error instanceof AuthError) {
       return {
@@ -46,6 +43,31 @@ export async function addPet(pet: unknown) {
   }
 
   revalidatePath("/app", "layout");
+}
+
+export async function signUp(formData: FormData) {
+  try {
+    const hashedPassword = await bcrypt.hash(
+      formData.get("password") as string,
+      10,
+    );
+
+    await prisma.user.create({
+      data: {
+        email: formData.get("email") as string,
+        hashedPassword,
+      },
+    });
+
+    await signIn("credentials", formData, { redirectTo: "/app/dashboard" });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return {
+        message: "Sign up failed. User may already exist.",
+      };
+    }
+    throw error;
+  }
 }
 
 export async function editPet(petId: unknown, newPetData: unknown) {
