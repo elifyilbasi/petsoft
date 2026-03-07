@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, createContext, useOptimistic } from "react";
+import { useState, createContext, useOptimistic, startTransition } from "react";
 import { toast } from "sonner";
 import { PetEssentials } from "@/lib/types";
 import { Pet } from "@prisma/client";
@@ -55,7 +55,9 @@ export default function PetContextProvider({
   };
 
   const handleAddPet = async (newPet: PetEssentials) => {
-    setOptimisticPets({ action: "add", payload: newPet });
+    startTransition(() => {
+      setOptimisticPets({ action: "add", payload: newPet });
+    });
     const error = await addPet(newPet);
     if (error) {
       toast.warning(error.message);
@@ -64,7 +66,9 @@ export default function PetContextProvider({
   };
 
   const handleEditPet = async (petId: Pet["id"], newPetData: PetEssentials) => {
-    setOptimisticPets({ action: "edit", payload: { id: petId, newPetData } });
+    startTransition(() => {
+      setOptimisticPets({ action: "edit", payload: { id: petId, newPetData } });
+    });
     const error = await editPet(petId, newPetData);
     if (error) {
       toast.warning(error.message);
@@ -73,7 +77,9 @@ export default function PetContextProvider({
   };
 
   const handleCheckoutPet = async (petId: Pet["id"]) => {
-    setOptimisticPets({ action: "delete", payload: petId });
+    startTransition(() => {
+      setOptimisticPets({ action: "delete", payload: petId });
+    });
     const error = await checkoutPet(petId);
     if (error) {
       toast.warning(error.message);

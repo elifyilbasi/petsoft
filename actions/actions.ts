@@ -6,6 +6,8 @@ import { AuthError } from "next-auth";
 import prisma from "@/lib/db";
 import { petFormSchema, petIdSchema } from "@/lib/validations";
 import { signIn, signOut } from "@/lib/auth";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export async function logIn(authData: FormData) {
   try {
@@ -22,27 +24,6 @@ export async function logIn(authData: FormData) {
 
 export async function logOut() {
   await signOut({ redirectTo: "/" });
-}
-
-export async function addPet(pet: unknown) {
-  const validatedPet = petFormSchema.safeParse(pet);
-  if (!validatedPet.success) {
-    return {
-      message: "Invalid pet data.",
-    };
-  }
-
-  try {
-    await prisma.pet.create({
-      data: validatedPet.data,
-    });
-  } catch {
-    return {
-      message: "Could not add pet.",
-    };
-  }
-
-  revalidatePath("/app", "layout");
 }
 
 export async function signUp(formData: FormData) {
@@ -68,6 +49,37 @@ export async function signUp(formData: FormData) {
     }
     throw error;
   }
+}
+
+export async function addPet(pet: unknown) {
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/login");
+  }
+
+  const validatedPet = petFormSchema.safeParse(pet);
+  if (!validatedPet.success) {
+    return {
+      message: "Invalid pet data.",
+    };
+  }
+
+  try {
+    await prisma.pet.create({
+      data: {
+        ...validatedPet.data,
+        user: {
+          connect: { id: session.user.id },
+        },
+      },
+    });
+  } catch {
+    return {
+      message: "Could not add pet.",
+    };
+  }
+
+  revalidatePath("/app", "layout");
 }
 
 export async function editPet(petId: unknown, newPetData: unknown) {

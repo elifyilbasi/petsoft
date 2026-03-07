@@ -4,15 +4,15 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 
 type AuthFormProps = {
-  type: "login" | "signUp";
+  type: "login" | "signup"; // lowercase to match page props
 };
 
 export default function AuthForm({ type }: AuthFormProps) {
+  // directly pass the server action exported from actions.ts
+  const action = type === "login" ? logIn : signUp;
+
   return (
-    <form
-      action={type === "login" ? logIn : signUp}
-      className="max-w-sm mx-auto mt-10"
-    >
+    <form action={action} className="max-w-sm mx-auto mt-10">
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input type="email" id="email" name="email" required />
