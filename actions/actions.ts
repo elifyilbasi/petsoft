@@ -1,8 +1,27 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { AuthError } from "next-auth";
 import prisma from "@/lib/db";
 import { petFormSchema, petIdSchema } from "@/lib/validations";
+import { signIn } from "@/lib/auth";
+
+export async function logIn(authData: FormData) {
+  try {
+    await signIn("credentials", {
+      email: authData.get("email") as string,
+      password: authData.get("password") as string,
+      redirectTo: "/app/dashboard",
+    });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return {
+        message: "Invalid email or password.",
+      };
+    }
+    throw error;
+  }
+}
 
 export async function addPet(pet: unknown) {
   const validatedPet = petFormSchema.safeParse(pet);
