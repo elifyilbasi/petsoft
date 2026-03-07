@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { AuthError } from "next-auth";
 import prisma from "@/lib/db";
 import { petFormSchema, petIdSchema } from "@/lib/validations";
-import { signIn } from "@/lib/auth";
+import { signIn, signOut } from "@/lib/auth";
 
 export async function logIn(authData: FormData) {
   try {
@@ -21,6 +21,10 @@ export async function logIn(authData: FormData) {
     }
     throw error;
   }
+}
+
+export async function logOut() {
+  await signOut({ redirectTo: "/" });
 }
 
 export async function addPet(pet: unknown) {
