@@ -6,12 +6,19 @@ import { AuthError } from "next-auth";
 
 import { signIn, signOut } from "@/lib/auth";
 import prisma from "@/lib/db";
-import { authCheck } from "@/lib/server-utils";
-import { petFormSchema, petIdSchema } from "@/lib/validations";
+import { authCheck, getPetById } from "@/lib/server-utils";
+import { authSchema, petFormSchema, petIdSchema } from "@/lib/validations";
 
-export async function logIn(authData: FormData) {
+export async function logIn(authData: unknown) {
+  if (!(authData instanceof FormData)) {
+    return {
+      message: "Invalid form data.",
+    };
+  }
   try {
-    await signIn("credentials", authData, { redirectTo: "/app/dashboard" });
+    await signIn("credentials", authData, {
+      redirectTo: "/app/dashboard",
+    });
   } catch (error) {
     if (error instanceof AuthError) {
       return {
@@ -26,21 +33,35 @@ export async function logOut() {
   await signOut({ redirectTo: "/" });
 }
 
-export async function signUp(formData: FormData) {
-  try {
-    const hashedPassword = await bcrypt.hash(
-      formData.get("password") as string,
-      10,
-    );
+export async function signUp(formData: unknown) {
+  // check if formData is an instance of FormData
+  if (!(formData instanceof FormData)) {
+    return {
+      message: "Invalid form data.",
+    };
+  }
+  // convert FormData to a plain object
+  const formDataEntries = Object.fromEntries(formData.entries());
+  const validatedFormData = authSchema.safeParse(formDataEntries);
+  if (!validatedFormData.success) {
+    return {
+      message: "Invalid form data.",
+    };
+  }
 
+  const { email, password } = validatedFormData.data;
+  const hashedPassword = await bcrypt.hash(password, 10);
+  try {
     await prisma.user.create({
       data: {
-        email: formData.get("email") as string,
+        email,
         hashedPassword,
       },
     });
 
-    await signIn("credentials", formData, { redirectTo: "/app/dashboard" });
+    await signIn("credentials", formData, {
+      redirectTo: "/app/dashboard",
+    });
   } catch (error) {
     if (error instanceof AuthError) {
       return {
@@ -93,11 +114,7 @@ export async function editPet(petId: unknown, newPetData: unknown) {
   }
 
   // authorization check: ensure the pet belongs to the user
-  const pet = await prisma.pet.findUnique({
-    where: {
-      id: validatedPetId.data,
-    },
-  });
+  const pet = await getPetById(validatedPetId.data);
   if (!pet) {
     return {
       message: "Pet not found.",
@@ -138,11 +155,7 @@ export async function checkoutPet(petId: unknown) {
   }
 
   // authorization check: ensure the pet belongs to the user
-  const pet = await prisma.pet.findUnique({
-    where: {
-      id: validatedPetId.data,
-    },
-  });
+  const pet = await getPetById(validatedPetId.data);
   if (!pet) {
     return {
       message: "Pet not found.",

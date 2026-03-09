@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import AuthForm from "@/components/auth-form";
 import H1 from "@/components/h1";
-
 export default function SignUp() {
   return (
     <main>

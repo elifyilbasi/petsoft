@@ -2,21 +2,19 @@ import bcrypt from "bcrypt";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
-import prisma from "@/lib/db";
+import { getUserByEmail } from "./server-utils";
+import { authSchema } from "./validations";
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       async authorize(credentials) {
-        const { email, password } = credentials as {
-          email: string;
-          password: string;
-        };
-        const user = await prisma.user.findUnique({
-          where: {
-            email,
-          },
-        });
+        const validatedFormData = authSchema.safeParse(credentials);
+        if (!validatedFormData.success) {
+          return null;
+        }
+        const { email, password } = validatedFormData.data;
+        const user = await getUserByEmail(email);
         if (!user) {
           return null;
         }
