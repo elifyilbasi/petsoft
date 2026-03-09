@@ -1,6 +1,10 @@
+"use client";
+
+import { useActionState } from "react";
+
 import { logIn, signUp } from "@/actions/actions";
 
-import { Button } from "./ui/button";
+import AuthFormBtn from "./auth-form-btn";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
@@ -9,11 +13,14 @@ type AuthFormProps = {
 };
 
 export default function AuthForm({ type }: AuthFormProps) {
+  const [loginState, loginAction] = useActionState(logIn, undefined);
+  const [signUpState, signUpAction] = useActionState(signUp, undefined);
+
+  const state = type === "login" ? loginState : signUpState;
+  const action = type === "login" ? loginAction : signUpAction;
+
   return (
-    <form
-      action={type === "login" ? logIn : signUp}
-      className="max-w-sm mx-auto mt-10"
-    >
+    <form action={action} className="max-w-sm mx-auto mt-10">
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input type="email" id="email" name="email" required />
@@ -23,9 +30,12 @@ export default function AuthForm({ type }: AuthFormProps) {
         <Label htmlFor="password">Password</Label>
         <Input type="password" id="password" name="password" required />
       </div>
-      <Button type="submit" className="mt-4">
-        {type === "login" ? "Log In" : "Sign Up"}
-      </Button>
+
+      <AuthFormBtn type={type} />
+
+      {state?.message && (
+        <p className="mt-4 text-sm text-red-500">{state.message}</p>
+      )}
     </form>
   );
 }

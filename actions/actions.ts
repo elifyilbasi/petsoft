@@ -1,5 +1,6 @@
 "use server";
 
+import { Prisma } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { revalidatePath } from "next/cache";
 import { AuthError } from "next-auth";
@@ -9,23 +10,30 @@ import prisma from "@/lib/db";
 import { authCheck, getPetById } from "@/lib/server-utils";
 import { authSchema, petFormSchema, petIdSchema } from "@/lib/validations";
 
-export async function logIn(authData: unknown) {
-  if (!(authData instanceof FormData)) {
+export async function logIn(prevState: unknown, formData: unknown) {
+  if (!(formData instanceof FormData)) {
     return {
       message: "Invalid form data.",
     };
   }
   try {
-    await signIn("credentials", authData, {
+    await signIn("credentials", formData, {
       redirectTo: "/app/dashboard",
     });
   } catch (error) {
     if (error instanceof AuthError) {
-      return {
-        message: "Invalid email or password.",
-      };
+      switch (error.type) {
+        case "CredentialsSignin":
+          return {
+            message: "Invalid email or password.",
+          };
+        default:
+          return {
+            message: "Authentication failed. Please try again.",
+          };
+      }
     }
-    throw error;
+    throw error; // nextjs redirects throws error, so we need to rethrow it
   }
 }
 
@@ -33,7 +41,7 @@ export async function logOut() {
   await signOut({ redirectTo: "/" });
 }
 
-export async function signUp(formData: unknown) {
+export async function signUp(prevState: unknown, formData: unknown) {
   // check if formData is an instance of FormData
   if (!(formData instanceof FormData)) {
     return {
@@ -42,6 +50,7 @@ export async function signUp(formData: unknown) {
   }
   // convert FormData to a plain object
   const formDataEntries = Object.fromEntries(formData.entries());
+
   const validatedFormData = authSchema.safeParse(formDataEntries);
   if (!validatedFormData.success) {
     return {
@@ -58,18 +67,22 @@ export async function signUp(formData: unknown) {
         hashedPassword,
       },
     });
-
-    await signIn("credentials", formData, {
-      redirectTo: "/app/dashboard",
-    });
   } catch (error) {
-    if (error instanceof AuthError) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
       return {
         message: "Sign up failed. User may already exist.",
       };
     }
-    throw error;
+    return {
+      message: "An unexpected error occurred. Please try again.",
+    };
   }
+  await signIn("credentials", formData, {
+    redirectTo: "/app/dashboard",
+  });
 }
 
 export async function addPet(pet: unknown) {
