@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
+
 import { usePetContext } from "@/lib/hooks";
+
 import PetButton from "./pet-button";
 
 export default function PetDetails() {

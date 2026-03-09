@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, createContext } from "react";
+import { createContext,useState } from "react";
 
 type SearchContextProviderProps = {
   children: React.ReactNode;

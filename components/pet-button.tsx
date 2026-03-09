@@ -1,8 +1,10 @@
 "use client";
 
+import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { flushSync } from "react-dom";
-import { PlusIcon } from "lucide-react";
+
+import PetForm from "./pet-form";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -12,7 +14,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
-import PetForm from "./pet-form";
 
 type PetButtonProps = {
   actionType: "add" | "edit" | "checkout";

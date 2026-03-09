@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+
 import { usePetContext, useSearchContext } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 

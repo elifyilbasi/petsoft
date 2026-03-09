@@ -3,11 +3,11 @@
 import bcrypt from "bcrypt";
 import { revalidatePath } from "next/cache";
 import { AuthError } from "next-auth";
-import prisma from "@/lib/db";
-import { petFormSchema, petIdSchema } from "@/lib/validations";
+
 import { signIn, signOut } from "@/lib/auth";
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+import prisma from "@/lib/db";
+import { authCheck } from "@/lib/server-utils";
+import { petFormSchema, petIdSchema } from "@/lib/validations";
 
 export async function logIn(authData: FormData) {
   try {
@@ -52,10 +52,7 @@ export async function signUp(formData: FormData) {
 }
 
 export async function addPet(pet: unknown) {
-  const session = await auth();
-  if (!session?.user) {
-    redirect("/login");
-  }
+  const session = await authCheck();
 
   const validatedPet = petFormSchema.safeParse(pet);
   if (!validatedPet.success) {
@@ -84,10 +81,7 @@ export async function addPet(pet: unknown) {
 
 export async function editPet(petId: unknown, newPetData: unknown) {
   // authentication check
-  const session = await auth();
-  if (!session?.user) {
-    redirect("/login");
-  }
+  const session = await authCheck();
 
   // validation check
   const validatedPetId = petIdSchema.safeParse(petId);
@@ -133,10 +127,7 @@ export async function editPet(petId: unknown, newPetData: unknown) {
 
 export async function checkoutPet(petId: unknown) {
   // authentication check
-  const session = await auth();
-  if (!session?.user) {
-    redirect("/login");
-  }
+  const session = await authCheck();
 
   // validation check
   const validatedPetId = petIdSchema.safeParse(petId);

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { auth as authMiddleware } from "./lib/auth";
 
 const proxy = authMiddleware((req) => {

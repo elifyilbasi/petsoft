@@ -1,6 +1,7 @@
-import prisma from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import bcrypt from "bcrypt";
+
+import prisma from "@/lib/db";
 
 const userData: Prisma.UserCreateInput = {
   email: "example@gmail.com",

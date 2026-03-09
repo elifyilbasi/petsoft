@@ -1,7 +1,8 @@
 import { logIn, signUp } from "@/actions/actions";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
+
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 
 type AuthFormProps = {
   type: "login" | "signup"; // lowercase to match page props

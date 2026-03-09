@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import Logo from "./logo";
 import { usePathname } from "next/navigation";
+
 import { cn } from "@/lib/utils";
+
+import Logo from "./logo";
 
 const routes = [
   { label: "Dashboard", path: "/app/dashboard" },
