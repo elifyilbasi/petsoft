@@ -3,11 +3,13 @@
 import { Prisma } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
 
 import { signIn, signOut } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { authCheck, getPetById } from "@/lib/server-utils";
+import { stripe } from "@/lib/stripe";
 import { authSchema, petFormSchema, petIdSchema } from "@/lib/validations";
 
 export async function logIn(prevState: unknown, formData: unknown) {
@@ -193,4 +195,23 @@ export async function checkoutPet(petId: unknown) {
     };
   }
   revalidatePath("/app", "layout");
+}
+
+export async function createCheckoutSession() {
+  const session = await authCheck();
+
+  const checkoutSession = await stripe.checkout.sessions.create({
+    customer_email: session.user.email!,
+    line_items: [
+      {
+        price: "price_1T9PUwGwRd3ayvGK9eGJMqJ5",
+        quantity: 1,
+      },
+    ],
+    mode: "payment",
+    success_url: `${process.env.CANONICAL_URL}/app/dashboard`,
+    cancel_url: `${process.env.CANONICAL_URL}/payment`,
+  });
+
+  redirect(checkoutSession.url!);
 }

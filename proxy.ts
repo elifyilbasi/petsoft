@@ -10,10 +10,19 @@ const proxy = authMiddleware((req) => {
     req.nextUrl.pathname.startsWith("/signup");
 
   if (!isLoggedIn && isTryingToAccessApp) {
-    return NextResponse.redirect(new URL("/login", req.nextUrl));
+    return Response.redirect(new URL("/login", req.nextUrl));
+  }
+  if (isLoggedIn && !isTryingToAccessApp) {
+    debugger;
+    if (
+      req.nextUrl.pathname.includes("/login") ||
+      req.nextUrl.pathname.includes("/signup")
+    ) {
+      return Response.redirect(new URL("/payment", req.nextUrl));
+    }
   }
   if (isLoggedIn && isOnAuthPage) {
-    return NextResponse.redirect(new URL("/app/dashboard", req.nextUrl));
+    return Response.redirect(new URL("/app/dashboard", req.nextUrl));
   }
 
   return NextResponse.next();
