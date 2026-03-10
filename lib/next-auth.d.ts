@@ -1,9 +1,14 @@
-import { User } from "next-auth";
+import { User as NextUser } from "next-auth";
 
 declare module "next-auth" {
   interface Session {
-    user: User & {
+    user: NextUser & {
       id: string;
+      hasPaid: boolean;
     };
+  }
+  interface User {
+    email: string;
+    hasPaid: boolean;
   }
 }
