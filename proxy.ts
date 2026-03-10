@@ -13,7 +13,6 @@ const proxy = authMiddleware((req) => {
     return Response.redirect(new URL("/login", req.nextUrl));
   }
   if (isLoggedIn && !isTryingToAccessApp) {
-    debugger;
     if (
       req.nextUrl.pathname.includes("/login") ||
       req.nextUrl.pathname.includes("/signup")
