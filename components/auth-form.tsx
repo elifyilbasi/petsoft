@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useActionState } from "react";
 
 import { logIn, signUp } from "@/actions/actions";
@@ -13,11 +15,17 @@ type AuthFormProps = {
 };
 
 export default function AuthForm({ type }: AuthFormProps) {
+  const router = useRouter();
   const [loginState, loginAction] = useActionState(logIn, undefined);
   const [signUpState, signUpAction] = useActionState(signUp, undefined);
 
   const state = type === "login" ? loginState : signUpState;
   const action = type === "login" ? loginAction : signUpAction;
+
+  useEffect(() => {
+    const next = (state as { redirectTo?: string } | undefined)?.redirectTo;
+    if (next) router.push(next);
+  }, [router, state]);
 
   return (
     <form action={action} className="max-w-sm mx-auto mt-10">

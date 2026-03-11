@@ -19,9 +19,17 @@ export async function logIn(prevState: unknown, formData: unknown) {
     };
   }
   try {
-    await signIn("credentials", formData, {
-      redirectTo: "/app/dashboard",
-    });
+    const formDataEntries = Object.fromEntries(formData.entries());
+    const validatedFormData = authSchema.safeParse(formDataEntries);
+    if (!validatedFormData.success) {
+      return {
+        message: "Invalid form data.",
+      };
+    }
+
+    const { email, password } = validatedFormData.data;
+    await signIn("credentials", { email, password, redirect: false });
+    return { redirectTo: "/app/dashboard" };
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
@@ -82,9 +90,8 @@ export async function signUp(prevState: unknown, formData: unknown) {
       message: "An unexpected error occurred. Please try again.",
     };
   }
-  await signIn("credentials", formData, {
-    redirectTo: "/app/dashboard",
-  });
+  await signIn("credentials", { email, password, redirect: false });
+  return { redirectTo: "/app/dashboard" };
 }
 
 export async function addPet(pet: unknown) {

@@ -31,17 +31,54 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    jwt: async ({ token, user }) => {
+    authorized: ({ auth, request }) => {
+      const { pathname } = request.nextUrl;
+      const isLoggedIn = Boolean(auth?.user);
+      const hasPaid = Boolean(auth?.user?.hasPaid);
+
+      const isAppRoute = pathname.startsWith("/app");
+      const isAuthRoute = pathname === "/login" || pathname === "/signup";
+      const isPaymentRoute = pathname === "/payment";
+
+      if (!isLoggedIn) {
+        if (isAppRoute)
+          return Response.redirect(new URL("/login", request.url));
+        return true;
+      }
+
+      if (!hasPaid) {
+        if (isAppRoute || isAuthRoute) {
+          return Response.redirect(new URL("/payment", request.url));
+        }
+        return true;
+      }
+
+      if (isAuthRoute || isPaymentRoute) {
+        return Response.redirect(new URL("/app/dashboard", request.url));
+      }
+
+      return true;
+    },
+    jwt: async ({ token, user, trigger }) => {
       if (user) {
         token.userId = user.id;
+        token.email = user.email;
+        token.hasPaid = user.hasPaid;
+      }
+
+      if (trigger === "update") {
+        const sessionUser = await getUserByEmail(token.email);
+        if (sessionUser) {
+          token.hasPaid = sessionUser.hasPaid;
+        }
       }
 
       return token;
     },
-    session: async ({ session, token }) => {
-      if (session.user) {
-        session.user.id = token.userId as string;
-      }
+    session: ({ session, token }) => {
+      session.user.id = token.userId as string;
+      session.user.hasPaid = Boolean(token.hasPaid);
+
       return session;
     },
   },
