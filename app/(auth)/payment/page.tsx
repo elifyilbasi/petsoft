@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 
 export default function Payment() {
   const [isPending, startTransition] = useTransition();
-  const { update } = useSession();
+  const { data: session, update, status } = useSession();
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -26,6 +26,7 @@ export default function Payment() {
             await update(true);
             router.push("/app/dashboard");
           }}
+          disabled={status === "loading" || session?.user.hasPaid}
         >
           Access PetSoft
         </Button>
