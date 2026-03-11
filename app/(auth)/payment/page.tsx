@@ -8,6 +8,8 @@ import { createCheckoutSession } from "@/actions/actions";
 import H1 from "@/components/h1";
 import { Button } from "@/components/ui/button";
 
+export const dynamic = "force-dynamic";
+
 export default function Payment() {
   const [isPending, startTransition] = useTransition();
   const { data: session, update, status } = useSession();
