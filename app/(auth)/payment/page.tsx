@@ -2,15 +2,30 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useTransition } from "react";
+import { Suspense, useTransition } from "react";
 
 import { createCheckoutSession } from "@/actions/actions";
 import H1 from "@/components/h1";
 import { Button } from "@/components/ui/button";
 
-export const dynamic = "force-dynamic";
-
 export default function Payment() {
+  return (
+    <Suspense fallback={<PaymentSkeleton />}>
+      <PaymentInner />
+    </Suspense>
+  );
+}
+
+function PaymentSkeleton() {
+  return (
+    <main className="flex flex-col items-center space-y-10">
+      <H1>PetSoft access requires payment</H1>
+      <Button disabled>Buy lifetime access for €299</Button>
+    </main>
+  );
+}
+
+function PaymentInner() {
   const [isPending, startTransition] = useTransition();
   const { data: session, update, status } = useSession();
   const router = useRouter();
