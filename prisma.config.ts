@@ -2,6 +2,11 @@ import "dotenv/config";
 
 import { defineConfig, env } from "prisma/config";
 
+const DATABASE_URL =
+  process.env.DATABASE_URL ??
+  process.env.POSTGRES_PRISMA_URL ??
+  process.env.POSTGRES_URL;
+
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
@@ -9,6 +14,13 @@ export default defineConfig({
     seed: "npx tsx ./prisma/seed.ts",
   },
   datasource: {
-    url: env("DATABASE_URL"),
+    url:
+      DATABASE_URL ??
+      (() => {
+        // Keep the error actionable for CI/Vercel.
+        throw new Error(
+          "Missing database env var: set DATABASE_URL (or POSTGRES_PRISMA_URL / POSTGRES_URL on Vercel).",
+        );
+      })(),
   },
 });
