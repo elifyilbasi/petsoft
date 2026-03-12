@@ -74,12 +74,3 @@ petsoft/
 ├── public/
 └── styles/
 
-**Image Usage**
-
-This project uses image URLs from [Unsplash](https://unsplash.com/).
-
-For consistency and external image safety, only image links from `unsplash.com` are allowed in the application.
-
-**Test Account**
-example@gmail.com (password: example)
-Stripe is in test mode, you can also test it with test credit card number 4242 4242 4242 4242
