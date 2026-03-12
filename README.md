@@ -8,6 +8,13 @@ The project demonstrates building a modern web application with authenticated ro
 
 [View the live app](https://petsoft-five.vercel.app)
 
+-This project uses image URLs from [Unsplash](https://unsplash.com/).
+For consistency and external image safety, only image links from `unsplash.com` are allowed in the application.
+
+**test account:** example@gmail.com (**password:** example)
+
+**Stripe is running in test mode.** Use the test card number \4242 4242 4242 4242` to simulate a successful payment.
+
 ## Features
 
 - Authentication flow for account access
