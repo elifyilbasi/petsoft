@@ -13,7 +13,7 @@ For consistency and external image safety, only image links from `unsplash.com` 
 
 **test account:** example@gmail.com (**password:** example)
 
-**Stripe is running in test mode.** Use the test card number 4242 4242 4242 4242` to simulate a successful payment.
+**Stripe is running in test mode.** Use the test card number 4242 4242 4242 4242 to simulate a successful payment.
 
 ## Features
 
